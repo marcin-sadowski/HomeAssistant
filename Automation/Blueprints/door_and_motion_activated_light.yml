@@ -22,7 +22,7 @@ blueprint:
         target:
           entity:
             domain: switch
-    no_motion_wait_no_motion_detected:
+    light_delay_no_motion_detected:
       name: Wait time
       description: Time to leave the light on when someone opened a door but not entered an area of detection
       default: 60
@@ -31,7 +31,7 @@ blueprint:
           min: 0
           max: 3600
           unit_of_measurement: seconds
-    no_motion_wait_after_last_motion:
+    light_delay_after_last_motion:
       name: Wait time
       description: Time to leave the light on after last motion was detected in an area
       default: 300
@@ -57,18 +57,6 @@ trigger:
 condition: []
 action:
   - service: light.turn_on
-    target: !input light_target
-  - wait_for_trigger:
-      platform: state
-      entity_id: !input motion_entity
-      from: "on"
-      to: "off"
-  - delay: !input no_motion_wait
-  - service: liht.turn_off
-    target: !input light_target
-
-
-  - service: light.turn_on
     metadata: {}
     data: {}
     target:
@@ -87,7 +75,7 @@ action:
       - delay:
           hours: 0
           minutes: 0
-          seconds: !input no_motion_wait_after_last_motion
+          seconds: !input light_delay_after_last_motion
           milliseconds: 0
       - service: light.turn_off
         metadata: {}
@@ -98,7 +86,7 @@ action:
       - delay:
           hours: 0
           minutes: 0
-          seconds: !input no_motion_wait_no_motion_detected
+          seconds: !input light_delay_no_motion_detected
           milliseconds: 0
       - service: light.turn_off
         metadata: {}
