@@ -2,7 +2,7 @@ blueprint:
   name: Door and Motion-activated Light
   description: Turn on a light when door was open or motion was detected.
   domain: automation
-  source_url: https://github.com/marcin-sadowski/HomeAssistant
+  source_url: https://github.com/marcin-sadowski/HomeAssistant/blob/main/Automation/Blueprints/door_and_motion_activated_light.yml
   input:
     door_sensor_entity:
       name: Door Sensor
