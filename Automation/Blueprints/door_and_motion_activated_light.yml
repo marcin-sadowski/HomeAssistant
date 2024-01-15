@@ -1,0 +1,107 @@
+blueprint:
+  name: Door and Motion-activated Light
+  description: Turn on a light when door was open or motion was detected.
+  domain: automation
+  source_url: https://github.com/marcin-sadowski/HomeAssistant
+  input:
+    contact_entity:
+      name: Contactron Sensor
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: motion
+    motion_entity:
+      name: Motion Sensor
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: door
+    light_target:
+      name: Light Switch
+      selector:
+        target:
+          entity:
+            domain: switch
+    no_motion_wait_no_motion_detected:
+      name: Wait time
+      description: Time to leave the light on when someone opened a door but not entered an area of detection
+      default: 60
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: seconds
+    no_motion_wait_after_last_motion:
+      name: Wait time
+      description: Time to leave the light on after last motion was detected in an area
+      default: 300
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: seconds
+
+
+# If motion is detected within the delay,
+# we restart the script.
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: state
+    entity_id: !input contact_entity
+    to: "on"
+  - platform: state
+    entity_id: !input motion_entity
+    to: "on"
+condition: []
+action:
+  - service: light.turn_on
+    target: !input light_target
+  - wait_for_trigger:
+      platform: state
+      entity_id: !input motion_entity
+      from: "on"
+      to: "off"
+  - delay: !input no_motion_wait
+  - service: liht.turn_off
+    target: !input light_target
+
+
+  - service: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: !input light_target
+  - if:
+      - condition: state
+        entity_id: !input motion_entity
+        state: "on"
+    then:
+      - wait_for_trigger:
+          - platform: state
+            entity_id:
+              - !input motion_entity
+            from: "on"
+            to: "off"
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: !input no_motion_wait_after_last_motion
+          milliseconds: 0
+      - service: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: !input light_target
+    else:
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: !input no_motion_wait_no_motion_detected
+          milliseconds: 0
+      - service: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: !input light_target
