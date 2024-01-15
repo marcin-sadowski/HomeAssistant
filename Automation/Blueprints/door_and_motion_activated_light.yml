@@ -68,8 +68,7 @@ action:
     then:
       - wait_for_trigger:
           - platform: state
-            entity_id:
-              - !input motion_entity
+            entity_id: !input motion_entity
             from: "on"
             to: "off"
       - delay:
